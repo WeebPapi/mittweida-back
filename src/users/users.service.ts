@@ -20,6 +20,14 @@ export class UsersService {
       throw new NotFoundException('User with ID not found');
     }
   }
+  async findByEmail(email: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    return user;
+  }
+
   async update(id: string, updateUserDto: Prisma.UserUpdateInput) {
     try {
       if (!(await this.findById(id))) {
