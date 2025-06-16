@@ -6,18 +6,20 @@ import {
   Req,
   Res,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { Prisma } from 'generated/prisma';
+import { Prisma, User } from 'generated/prisma';
 import { AuthService } from './auth.service';
 import { LogInInfo } from './interfaces';
 import { Response, Request } from 'express';
+import { JwtRefreshGuard } from './jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('register')
   async register(
-    @Res() response: Response,
+    @Res({ passthrough: true }) response: Response,
     @Body() formData: Prisma.UserCreateInput,
   ) {
     const credentials = await this.authService.register(formData);
@@ -33,10 +35,16 @@ export class AuthController {
       sameSite: 'strict',
     });
 
-    return response.json();
+    return {
+      message: 'Successfully registered',
+      user: credentials.user,
+    };
   }
   @Post('login')
-  async login(@Res() response: Response, formData: LogInInfo) {
+  async login(
+    @Res({ passthrough: true }) response: Response,
+    @Body() formData: LogInInfo,
+  ) {
     const credentials = await this.authService.login(formData);
 
     response.cookie('access_token', credentials.access_token, {
@@ -51,10 +59,13 @@ export class AuthController {
       sameSite: 'strict',
     });
 
-    return response.json();
+    return {
+      message: 'Successfully logged in',
+      user: credentials.user,
+    };
   }
   @Post('logout')
-  async logout(@Res() response: Response) {
+  async logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie('access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -67,34 +78,28 @@ export class AuthController {
       sameSite: 'strict',
     });
 
-    return response.json({ message: 'Logged out successfully' });
+    return { message: 'Logged out successfully' };
   }
   @Post('refresh-token')
-  async refresh(@Req() request: Request, @Res() response: Response) {
+  @UseGuards(JwtRefreshGuard)
+  async refresh(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     try {
-      const refreshToken = request.cookies['refresh_token'];
-
-      if (!refreshToken) {
-        throw new UnauthorizedException('No refresh token provided');
-      }
-
-      const result = await this.authService.refresh(refreshToken);
-
-      response.cookie('access_token', result.access_token, {
+      const credentials = await this.authService.refresh(request.user as User);
+      response.cookie('access_token', credentials.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 15 * 60 * 1000,
       });
 
-      response.cookie('refresh_token', result.refresh_token, {
+      response.cookie('refresh_token', credentials.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-
-      return response.json({ user: result.user });
+      return { message: 'Successfully refreshed', user: credentials.user };
     } catch (error) {
       throw new UnauthorizedException('Token refresh failed');
     }
