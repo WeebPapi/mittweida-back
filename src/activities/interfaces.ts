@@ -1,7 +1,6 @@
 export interface ActivitySearch {
   searchQuery?: string;
-  categories?: string[];
-  isOpenNow?: boolean;
+  categories?: string;
   latitude?: number;
   longitude?: number;
   limit?: number;

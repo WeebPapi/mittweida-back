@@ -18,7 +18,6 @@ export class ActivitiesService {
   async findActivities({
     searchQuery,
     categories,
-    isOpenNow,
     latitude,
     longitude,
     limit = 4,
@@ -41,7 +40,14 @@ export class ActivitiesService {
               ].filter((condition) => Object.keys(condition).length > 0),
             }
           : {},
-        categories?.length ? { category: { in: categories } } : {},
+        categories?.length
+          ? {
+              category: {
+                in: categories.split(','),
+                mode: 'insensitive' as const,
+              },
+            }
+          : {},
       ],
     };
     const activities = await this.prismaService.activity.findMany({

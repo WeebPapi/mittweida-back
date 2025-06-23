@@ -112,7 +112,7 @@ model PollVote {
 
 model Activity {
   id          String       @id @default(uuid())
-  name        String
+  name        String      
   description String
   address     String
   latitude    Float
