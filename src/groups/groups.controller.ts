@@ -19,15 +19,29 @@ import { Request } from 'express';
 export class GroupsController {
   constructor(private readonly groupsService: GroupsService) {}
   @Post()
+  @UseGuards(JwtAuthGuard)
   async createGroup(
+    @Req() request: Request,
     @Body() createGroupDto: Omit<Prisma.GroupCreateInput, 'code'>,
   ) {
-    return this.groupsService.create(createGroupDto);
+    return this.groupsService.create(
+      createGroupDto,
+      (request?.user as any).sub,
+    );
   }
   @Post('join')
   @UseGuards(JwtAuthGuard)
-  async joinGroup(@Req() request: Request, code: string) {
-    return this.groupsService.join(request?.user as User, code);
+  async joinGroup(@Req() request: Request, @Body('code') code: string) {
+    console.log('Request here:', request.user);
+    return this.groupsService.join(
+      { id: (request.user as any).sub as string },
+      code,
+    );
+  }
+  @Post('leave')
+  @UseGuards(JwtAuthGuard)
+  async leaveGroup(@Req() request: any, @Body('groupId') groupId: string) {
+    return this.groupsService.leave(request.user.sub, groupId);
   }
   @Get(':id')
   async getGroupById(@Param('id') id: string) {
@@ -35,6 +49,7 @@ export class GroupsController {
   }
   @Put(':id')
   async updateGroup(
+    @Param('id')
     id: string,
     @Body() updateGroupDto: Prisma.GroupUpdateInput,
   ) {
