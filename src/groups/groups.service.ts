@@ -48,7 +48,7 @@ export class GroupsService {
       if (!codeExists) return code;
     }
   }
-  async instantiateGroupMember(user, group: Group, isAdmin: boolean) {
+  async instantiateGroupMember(user: User, group: Group, isAdmin: boolean) {
     const member = await this.prismaService.groupMember.create({
       data: {
         userId: user.id,

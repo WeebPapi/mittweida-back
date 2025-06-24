@@ -3,6 +3,9 @@ export interface LogInInfo {
   password: string;
 }
 export interface TokenPayload {
-  sub: string;
+  id: string;
   email: string;
+  role: 'ADMIN' | 'BUSINESS_OWNER' | 'USER';
+  iat: number;
+  exp: number;
 }

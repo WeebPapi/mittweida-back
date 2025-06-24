@@ -28,7 +28,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
   async validate(req: Request, payload: TokenPayload) {
     return this.authService.validateRefresh(
       req.cookies.refresh_token,
-      payload.sub,
+      payload.id,
     );
   }
 }
