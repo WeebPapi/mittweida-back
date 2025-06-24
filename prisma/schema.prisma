@@ -77,7 +77,7 @@ model Poll {
   question  String
   options   PollOption[]
   createdAt DateTime     @default(now())
-  expiresAt DateTime
+  expiresAt DateTime    
   createdBy String
   groupId   String
   user      User         @relation(fields: [createdBy], references: [id], onDelete: Cascade)

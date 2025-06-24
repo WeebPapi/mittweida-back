@@ -14,6 +14,15 @@ export class ActivitiesService {
   async findById(id: string) {
     return this.prismaService.activity.findUnique({ where: { id } });
   }
+  async findManyByIds(ids: string[]): Promise<Activity[]> {
+    return this.prismaService.activity.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
 
   async findActivities({
     searchQuery,

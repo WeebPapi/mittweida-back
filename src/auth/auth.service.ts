@@ -15,6 +15,7 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
   async validateRefresh(refresh_token: string, id: string) {
+    console.log(refresh_token, id);
     const user = await this.usersService.findById(id);
     const compare = await bcrypt.compare(refresh_token, user?.refresh_token!);
     if (!user || !compare) throw new UnauthorizedException();
@@ -22,7 +23,7 @@ export class AuthService {
     return user;
   }
   async generateTokens(user: User) {
-    const payload = { sub: user.id, email: user.email, role: user.role };
+    const payload = { id: user.id, email: user.email, role: user.role };
 
     const returnObj = {
       access_token: this.jwtService.sign(payload, {
