@@ -15,6 +15,8 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { RolesGuard } from './roles.guard';
 import { Roles } from './roles.decorator';
 import { Prisma } from 'generated/prisma';
+import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Controller('activities')
 export class ActivitiesController {
@@ -27,13 +29,16 @@ export class ActivitiesController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'BUSINESS_OWNER')
-  async create(@Body() createActivityDto: Prisma.ActivityCreateInput) {
+  async create(@Body() createActivityDto: CreateActivityDto) {
     return await this.activitiesService.create(createActivityDto);
   }
   @Put(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN', 'BUSINESS_OWNER')
-  async updateActivity(@Param('id') id: string, @Body() updateActivityDto) {
+  async updateActivity(
+    @Param('id') id: string,
+    @Body() updateActivityDto: UpdateActivityDto,
+  ) {
     return await this.activitiesService.updateActivity(id, updateActivityDto);
   }
   @Delete(':id')

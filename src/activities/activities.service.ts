@@ -2,12 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { Activity, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ActivitySearch } from './interfaces';
+import { CreateActivityDto } from './dto/create-activity.dto';
+import { UpdateActivityDto } from './dto/update-activity.dto';
 
 @Injectable()
 export class ActivitiesService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async create(activityData: Prisma.ActivityCreateInput) {
+  async create(activityData: CreateActivityDto) {
     return this.prismaService.activity.create({ data: activityData });
   }
 
@@ -72,7 +74,6 @@ export class ActivitiesService {
     return activities;
   }
   async findRandomActivities(limit = 4, excludeIds: string[] = []) {
-    // For PostgreSQL/Neon, you can use raw SQL for true randomization
     return this.prismaService.$queryRaw`
       SELECT * FROM "Activity" 
       WHERE id NOT IN (${Prisma.join(excludeIds)})
@@ -81,10 +82,7 @@ export class ActivitiesService {
     `;
   }
 
-  async updateActivity(
-    id: string,
-    updateActivityDto: Prisma.ActivityUpdateInput,
-  ) {
+  async updateActivity(id: string, updateActivityDto: UpdateActivityDto) {
     return this.prismaService.activity.update({
       where: { id },
       data: { ...updateActivityDto },

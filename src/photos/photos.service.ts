@@ -8,11 +8,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Photo } from 'generated/prisma';
 import { UploadPhotoDto } from './dto/upload-photo.dto';
 import { UpdatePhotoDto } from './dto/update-photo.dto';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
+import { S3Client, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuid } from 'uuid';
@@ -62,7 +58,7 @@ export class PhotosService {
           Key: s3Key,
           Body: file.buffer,
           ContentType: file.mimetype,
-          ACL: 'private',
+          ACL: 'public-read',
         },
         queueSize: 4,
         partSize: 1024 * 1024 * 5,
@@ -74,7 +70,7 @@ export class PhotosService {
 
       await parallelUploads3.done();
 
-      const photoUrl = `s3://${this.bucketName}/${s3Key}`;
+      const photoUrl = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${s3Key}`; // <--- Store direct public URL
 
       const newPhoto = await this.prisma.photo.create({
         data: {

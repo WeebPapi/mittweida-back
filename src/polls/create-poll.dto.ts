@@ -22,6 +22,5 @@ export class CreatePollDto {
 
   @IsArray()
   @ArrayNotEmpty()
-  // @IsUUID('4', { each: true })
   selectedActivityIds: string[];
 }

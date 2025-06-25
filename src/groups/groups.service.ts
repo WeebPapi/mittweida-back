@@ -3,9 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Group, Prisma, User } from 'generated/prisma';
+import { Group, User } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
+import { CreateGroupDto } from './dto/create-group.dto';
+import { UpdateGroupDto } from './dto/update-group.dto';
 
 @Injectable()
 export class GroupsService {
@@ -58,10 +60,7 @@ export class GroupsService {
     });
     return member;
   }
-  async create(
-    createGroupDto: Omit<Prisma.GroupCreateInput, 'code'>,
-    id: string,
-  ) {
+  async create(createGroupDto: CreateGroupDto, id: string) {
     let code = await this.generateCode();
     const group = await this.prismaService.group.create({
       data: { ...createGroupDto, code },
@@ -76,7 +75,7 @@ export class GroupsService {
   async findGroup(id: string) {
     return this.prismaService.group.findUnique({ where: { id } });
   }
-  async updateGroup(id: string, updateGroupDto: Prisma.GroupUpdateInput) {
+  async updateGroup(id: string, updateGroupDto: UpdateGroupDto) {
     return this.prismaService.group.update({
       where: { id },
       data: updateGroupDto,
