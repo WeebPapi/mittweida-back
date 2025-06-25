@@ -1,18 +1,18 @@
 import {
   Body,
   Controller,
-  Get,
   Post,
   Req,
   Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { Prisma, User } from 'generated/prisma';
+import { User } from 'generated/prisma';
 import { AuthService } from './auth.service';
 import { LogInInfo } from './interfaces';
 import { Response, Request } from 'express';
 import { JwtRefreshGuard } from './jwt-refresh.guard';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -20,7 +20,7 @@ export class AuthController {
   @Post('register')
   async register(
     @Res({ passthrough: true }) response: Response,
-    @Body() formData: Prisma.UserCreateInput,
+    @Body() formData: CreateUserDto,
   ) {
     const credentials = await this.authService.register(formData);
     response.cookie('access_token', credentials.access_token, {

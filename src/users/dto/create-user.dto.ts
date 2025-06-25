@@ -17,4 +17,8 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   profilePicture?: string;
+
+  @IsOptional()
+  @IsString()
+  role?: 'ADMIN' | 'USER' | 'BUSINESS_OWNER';
 }

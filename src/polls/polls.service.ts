@@ -2,38 +2,42 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Poll, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreatePollDto } from './create-poll.dto';
+import { CreatePollDto } from './dto/create-poll.dto';
 import { UsersService } from 'src/users/users.service';
-import { GroupsService } from 'src/groups/groups.service';
 import { ActivitiesService } from 'src/activities/activities.service';
+import { UpdatePollDto } from './dto/update-poll.dto';
 
 @Injectable()
 export class PollsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly usersService: UsersService,
-    private readonly groupsService: GroupsService,
     private readonly activitiesService: ActivitiesService,
   ) {}
 
   async findById(id: string): Promise<Poll | null> {
-    return this.prismaService.poll.findUnique({
-      where: { id },
-      include: {
-        options: {
-          include: {
-            activity: true,
-            votes: true,
+    try {
+      return this.prismaService.poll.findUnique({
+        where: { id },
+        include: {
+          options: {
+            include: {
+              activity: true,
+              votes: true,
+            },
           },
+          user: { select: { id: true, firstName: true, lastName: true } },
+          group: { select: { id: true, name: true } },
         },
-        user: { select: { id: true, firstName: true, lastName: true } },
-        group: { select: { id: true, name: true } },
-      },
-    });
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Poll not found');
+    }
   }
   async create(createPollDto: CreatePollDto, userId: string) {
     const { question, groupId, expiresAt, selectedActivityIds } = createPollDto;
@@ -133,11 +137,17 @@ export class PollsService {
     return { message: 'Successfully voted' };
   }
 
-  async update(id: string, updatePollDto: Prisma.PollUpdateInput) {
-    return this.prismaService.poll.update({
-      where: { id },
-      data: updatePollDto,
-    });
+  async update(id: string, updatePollDto: UpdatePollDto) {
+    const poll = await this.findById(id);
+    if (!poll) throw new NotFoundException('Poll not found');
+    try {
+      return this.prismaService.poll.update({
+        where: { id },
+        data: updatePollDto,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Error updating poll');
+    }
   }
   async delete(id: string) {
     return this.prismaService.poll.delete({ where: { id } });

@@ -6,6 +6,7 @@ import * as bcrypt from 'bcryptjs';
 import { Prisma, User } from 'generated/prisma';
 import { LogInInfo } from './interfaces';
 import { ConfigService } from '@nestjs/config';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,6 @@ export class AuthService {
     private readonly configService: ConfigService,
   ) {}
   async validateRefresh(refresh_token: string, id: string) {
-    console.log(refresh_token, id);
     const user = await this.usersService.findById(id);
     const compare = await bcrypt.compare(refresh_token, user?.refresh_token!);
     if (!user || !compare) throw new UnauthorizedException();
@@ -48,7 +48,7 @@ export class AuthService {
 
     return returnObj;
   }
-  async register(createUserDto: Prisma.UserCreateInput) {
+  async register(createUserDto: CreateUserDto) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = await this.usersService.create({
       firstName: createUserDto.firstName,

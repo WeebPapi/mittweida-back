@@ -1,9 +1,10 @@
 import {
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Group, User } from 'generated/prisma';
+import { Group, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UsersService } from 'src/users/users.service';
 import { CreateGroupDto } from './dto/create-group.dto';
@@ -50,7 +51,11 @@ export class GroupsService {
       if (!codeExists) return code;
     }
   }
-  async instantiateGroupMember(user: User, group: Group, isAdmin: boolean) {
+  async instantiateGroupMember(
+    user: { id: string },
+    group: Group,
+    isAdmin: boolean,
+  ) {
     const member = await this.prismaService.groupMember.create({
       data: {
         userId: user.id,
@@ -62,26 +67,41 @@ export class GroupsService {
   }
   async create(createGroupDto: CreateGroupDto, id: string) {
     let code = await this.generateCode();
-    const group = await this.prismaService.group.create({
-      data: { ...createGroupDto, code },
-    });
-    await this.instantiateGroupMember(
-      await this.usersService.findById(id),
-      group,
-      true,
-    );
-    return group;
+    try {
+      const group = await this.prismaService.group.create({
+        data: { ...createGroupDto, code },
+      });
+      await this.instantiateGroupMember(
+        await this.usersService.findById(id),
+        group,
+        true,
+      );
+      return group;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Group code already exists');
+        }
+      }
+      throw new InternalServerErrorException('Failed to create group');
+    }
   }
   async findGroup(id: string) {
     return this.prismaService.group.findUnique({ where: { id } });
   }
   async updateGroup(id: string, updateGroupDto: UpdateGroupDto) {
-    return this.prismaService.group.update({
-      where: { id },
-      data: updateGroupDto,
-    });
+    const group = await this.prismaService.group.findUnique({ where: { id } });
+    if (!group) throw new NotFoundException('Group Not found');
+    try {
+      return this.prismaService.group.update({
+        where: { id },
+        data: updateGroupDto,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update group');
+    }
   }
-  async join(user, code: string) {
+  async join(user: { id: string }, code: string) {
     const group = await this.prismaService.group.findUnique({
       where: { code },
       include: { members: true },
@@ -101,7 +121,7 @@ export class GroupsService {
     return member;
   }
   async leave(userId: string, groupId: string) {
-    await this.prismaService.groupMember.delete({
+    const member = await this.prismaService.groupMember.findUnique({
       where: {
         userId_groupId: {
           userId,
@@ -109,9 +129,28 @@ export class GroupsService {
         },
       },
     });
-    return { message: 'Successfully left group' };
+    if (!member) throw new NotFoundException('Member not found');
+    try {
+      await this.prismaService.groupMember.delete({
+        where: {
+          userId_groupId: {
+            userId,
+            groupId,
+          },
+        },
+      });
+      return { message: 'Successfully left group' };
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to leave group');
+    }
   }
   async delete(id: string) {
-    return await this.prismaService.group.delete({ where: { id } });
+    const group = await this.prismaService.group.findUnique({ where: { id } });
+    if (!group) throw new NotFoundException('Group not found');
+    try {
+      return await this.prismaService.group.delete({ where: { id } });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete group');
+    }
   }
 }

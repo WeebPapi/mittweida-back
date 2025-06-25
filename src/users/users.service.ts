@@ -1,5 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from 'generated/prisma';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import { Prisma, User } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -8,7 +13,16 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
   async create(createUserDto: CreateUserDto) {
-    return this.prismaService.user.create({ data: createUserDto });
+    try {
+      return await this.prismaService.user.create({ data: createUserDto });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already in use');
+        }
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
   }
   async findById(id: string): Promise<User> {
     try {
@@ -44,7 +58,12 @@ export class UsersService {
         id: updateAction.id,
       };
     } catch (error) {
-      throw new Error(error);
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already in use');
+        }
+      }
+      throw new InternalServerErrorException('Failed to update user');
     }
   }
   async delete(id: string) {

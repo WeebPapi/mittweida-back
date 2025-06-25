@@ -38,7 +38,6 @@ export class GroupsController {
   @Post('join')
   @UseGuards(JwtAuthGuard)
   async joinGroup(@Req() request: Request, @Body('code') code: string) {
-    console.log('Request here:', request.user);
     return this.groupsService.join(
       { id: (request.user as TokenPayload).id as string },
       code,

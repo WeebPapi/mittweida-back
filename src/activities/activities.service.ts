@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Activity, Prisma } from 'generated/prisma';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ActivitySearch } from './interfaces';
@@ -10,20 +14,32 @@ export class ActivitiesService {
   constructor(private readonly prismaService: PrismaService) {}
 
   async create(activityData: CreateActivityDto) {
-    return this.prismaService.activity.create({ data: activityData });
+    try {
+      return await this.prismaService.activity.create({ data: activityData });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to create activity');
+    }
   }
 
   async findById(id: string) {
-    return this.prismaService.activity.findUnique({ where: { id } });
+    const activity = await this.prismaService.activity.findUnique({
+      where: { id },
+    });
+    if (!activity) throw new NotFoundException('Activity not found');
+    return activity;
   }
   async findManyByIds(ids: string[]): Promise<Activity[]> {
-    return this.prismaService.activity.findMany({
-      where: {
-        id: {
-          in: ids,
+    try {
+      return this.prismaService.activity.findMany({
+        where: {
+          id: {
+            in: ids,
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Error finding by Ids');
+    }
   }
 
   async findActivities({
@@ -73,24 +89,39 @@ export class ActivitiesService {
 
     return activities;
   }
-  async findRandomActivities(limit = 4, excludeIds: string[] = []) {
+  async findRandomActivities(limit = 4) {
     return this.prismaService.$queryRaw`
       SELECT * FROM "Activity" 
-      WHERE id NOT IN (${Prisma.join(excludeIds)})
       ORDER BY RANDOM() 
       LIMIT ${limit}
     `;
   }
 
   async updateActivity(id: string, updateActivityDto: UpdateActivityDto) {
-    return this.prismaService.activity.update({
+    const activity = await this.prismaService.activity.findUnique({
       where: { id },
-      data: { ...updateActivityDto },
     });
+    if (!activity) throw new NotFoundException('Activity not found');
+    try {
+      return await this.prismaService.activity.update({
+        where: { id },
+        data: updateActivityDto,
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to update activity');
+    }
   }
 
   async deleteActivity(id: string) {
-    return this.prismaService.activity.delete({ where: { id } });
+    const activity = await this.prismaService.activity.findUnique({
+      where: { id },
+    });
+    if (!activity) throw new NotFoundException('Activity not found');
+    try {
+      return await this.prismaService.activity.delete({ where: { id } });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to delete activity');
+    }
   }
 
   private sortByDistance(

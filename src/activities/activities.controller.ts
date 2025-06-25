@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
@@ -22,8 +23,15 @@ import { UpdateActivityDto } from './dto/update-activity.dto';
 export class ActivitiesController {
   constructor(private readonly activitiesService: ActivitiesService) {}
   @Get()
-  findAll(@Query() query: ActivitySearch) {
+  async findAll(@Query() query: ActivitySearch) {
     return this.activitiesService.findActivities(query);
+  }
+
+  @Get('random')
+  async findRandom(
+    @Query('limit', new ParseIntPipe({ optional: true })) limit = 4,
+  ) {
+    return this.activitiesService.findRandomActivities(limit);
   }
 
   @Post()

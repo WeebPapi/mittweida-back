@@ -12,11 +12,12 @@ import {
 } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { Prisma } from 'generated/prisma';
-import { CreatePollDto } from './create-poll.dto';
+import { CreatePollDto } from './dto/create-poll.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 import { TokenPayload } from 'src/auth/interfaces';
 import { Request } from 'express';
-import { CreatePollVoteDto } from './create-poll-vote.dto';
+import { CreatePollVoteDto } from './dto/create-poll-vote.dto';
+import { UpdatePollDto } from './dto/update-poll.dto';
 
 @Controller('polls')
 export class PollsController {
@@ -53,7 +54,7 @@ export class PollsController {
   @Put(':id')
   async updatePoll(
     @Param('id') id: string,
-    @Body() createPollDto: Prisma.PollCreateInput,
+    @Body() createPollDto: UpdatePollDto,
   ) {
     return this.pollsService.update(id, createPollDto);
   }
