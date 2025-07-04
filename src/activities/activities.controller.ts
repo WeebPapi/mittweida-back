@@ -27,16 +27,15 @@ export class ActivitiesController {
     return this.activitiesService.findActivities(query);
   }
 
-  @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return this.activitiesService.findById(id);
-  }
-
-  @Get('random')
+  @Get('/random')
   async findRandom(
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 4,
   ) {
     return this.activitiesService.findRandomActivities(limit);
+  }
+  @Get(':id')
+  async findOne(@Param('id') id: string) {
+    return this.activitiesService.findById(id);
   }
 
   @Post()
