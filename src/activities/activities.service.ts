@@ -42,6 +42,9 @@ export class ActivitiesService {
     }
   }
 
+  // async createMany(body) {
+  //   return this.prismaService.activity.createMany({ data: body });
+  // }
   async findActivities({
     searchQuery,
     categories,

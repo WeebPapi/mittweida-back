@@ -15,7 +15,7 @@ datasource db {
 }
 
 model User {
-  id             String        @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   email          String         @unique
   password       String
   firstName      String
@@ -38,7 +38,7 @@ enum UserRole {
 }
 
 model Group {
-  id        String        @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   name      String
   code      String        @unique
   createdAt DateTime      @default(now())
@@ -49,9 +49,9 @@ model Group {
 }
 
 model GroupMember {
-  id       String   @id @default(uuid())
-  userId   String
-  groupId  String
+id String @id @default(uuid()) @db.Uuid
+  userId   String @db.Uuid
+  groupId  String @db.Uuid
   isAdmin  Boolean  @default(false)
   joinedAt DateTime @default(now())
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -61,35 +61,35 @@ model GroupMember {
 }
 
 model Photo {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   url       String
   caption   String?
   location  String?
-  userId    String
-  groupId   String?
+  userId    String @db.Uuid
+  groupId   String? @db.Uuid
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   group     Group?   @relation(fields: [groupId], references: [id], onDelete: SetNull)
 }
 
 model Poll {
-  id        String       @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   question  String
   options   PollOption[]
   createdAt DateTime     @default(now())
   expiresAt DateTime    
-  createdBy String
-  groupId   String
+  createdBy String @db.Uuid
+  groupId   String @db.Uuid
   user      User         @relation(fields: [createdBy], references: [id], onDelete: Cascade)
   group     Group        @relation(fields: [groupId], references: [id], onDelete: Cascade)
   votes     PollVote[]
 }
 
 model PollOption {
-  id         String     @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   text       String
-  pollId     String
-  activityId String
+  pollId     String @db.Uuid
+  activityId String @db.Uuid
   activity   Activity   @relation(fields: [activityId], references: [id], onDelete: Cascade)
   poll       Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
   votes      PollVote[]
@@ -98,10 +98,10 @@ model PollOption {
 }
 
 model PollVote {
-  id           String     @id @default(uuid())
-  userId       String
-  pollId       String
-  pollOptionId String
+  id String @id @default(uuid()) @db.Uuid
+  userId       String @db.Uuid
+  pollId       String @db.Uuid
+  pollOptionId String @db.Uuid
   createdAt    DateTime   @default(now())
   user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   poll         Poll       @relation(fields: [pollId], references: [id], onDelete: Cascade)
@@ -111,7 +111,7 @@ model PollVote {
 }
 
 model Activity {
-  id          String       @id @default(uuid())
+  id String @id @default(uuid()) @db.Uuid
   name        String      
   description String
   address     String
@@ -124,4 +124,5 @@ model Activity {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   PollOption  PollOption[]
+  gallery_images String[]
 }

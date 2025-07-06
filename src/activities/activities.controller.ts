@@ -37,6 +37,10 @@ export class ActivitiesController {
   async findOne(@Param('id') id: string) {
     return this.activitiesService.findById(id);
   }
+  // @Post('/createMany/')
+  // async createMany(@Body() body) {
+  //   return this.activitiesService.createMany(body);
+  // }
 
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)

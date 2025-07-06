@@ -30,6 +30,7 @@ export class UsersService {
         where: {
           id,
         },
+        include: { groups: {}, photos: {}, polls: {}, pollVotes: {} },
       })) as User;
       return user;
     } catch (error) {
