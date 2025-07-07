@@ -87,7 +87,14 @@ export class GroupsService {
     }
   }
   async findGroup(id: string) {
-    return this.prismaService.group.findUnique({ where: { id } });
+    return this.prismaService.group.findUnique({
+      where: { id },
+      include: {
+        members: {},
+        photos: {},
+        polls: {},
+      },
+    });
   }
   async updateGroup(id: string, updateGroupDto: UpdateGroupDto) {
     const group = await this.prismaService.group.findUnique({ where: { id } });
