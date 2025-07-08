@@ -8,7 +8,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
-      'https://mittweida-front-d7cl.vercel.app/',
+      'https://https://mittweida-front.vercel.app/',
       'http://localhost:5173',
       '192.168.0.101:5173',
       '80.241.200.66:5173',
