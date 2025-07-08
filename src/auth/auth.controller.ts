@@ -27,14 +27,12 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: '.railway.app',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: '.railway.app',
     });
 
     return {
@@ -53,14 +51,12 @@ export class AuthController {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: '.railway.app',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'none',
-      domain: '.railway.app',
     });
 
     return {
@@ -96,14 +92,12 @@ export class AuthController {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
-        domain: '.railway.app',
       });
 
       response.cookie('refresh_token', credentials.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'none',
-        domain: '.railway.app',
       });
       return { message: 'Successfully refreshed', user: credentials.user };
     } catch (error) {
