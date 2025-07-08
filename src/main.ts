@@ -9,6 +9,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [
       'https://mittweida-front.vercel.app',
+      'https://localhost:5173',
+      'https://192.168.0.101:5173',
+      'https://80.241.200.66:5173',
       'http://localhost:5173',
       'http://192.168.0.101:5173',
       'http://80.241.200.66:5173',
