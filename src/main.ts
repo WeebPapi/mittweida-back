@@ -27,6 +27,13 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+  //FOR DEV
+  app.enableCors({
+    origin: '80.241.200.66:5173',
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  });
   app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
