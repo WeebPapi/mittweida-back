@@ -2,10 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  console.log('Current NODE_ENV:', process.env.NODE_ENV);
+
+  const expressApp = app.getHttpAdapter().getInstance() as express.Application;
+  expressApp.set('trust proxy', 1); // Or true, or a number indicating hop count
+
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
