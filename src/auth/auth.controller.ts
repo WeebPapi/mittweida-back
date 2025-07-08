@@ -91,13 +91,15 @@ export class AuthController {
       response.cookie('access_token', credentials.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none',
+        path: '/',
       });
 
       response.cookie('refresh_token', credentials.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: 'none',
+        path: '/',
       });
       return { message: 'Successfully refreshed', user: credentials.user };
     } catch (error) {
