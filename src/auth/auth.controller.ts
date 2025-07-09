@@ -26,13 +26,13 @@ export class AuthController {
     response.cookie('access_token', credentials.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
 
     return {
@@ -43,6 +43,7 @@ export class AuthController {
   @Post('login')
   async login(
     @Res({ passthrough: true }) response: Response,
+    @Req() request: Request,
     @Body() formData: LogInInfo,
   ) {
     const credentials = await this.authService.login(formData);
@@ -50,14 +51,15 @@ export class AuthController {
     response.cookie('access_token', credentials.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
+    console.log('Response body', response.getHeaders());
 
     return {
       message: 'Successfully logged in',
@@ -69,13 +71,13 @@ export class AuthController {
     response.clearCookie('access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
 
     response.clearCookie('refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: 'lax',
     });
 
     return { message: 'Logged out successfully' };
@@ -91,13 +93,13 @@ export class AuthController {
       response.cookie('access_token', credentials.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: 'lax',
       });
 
       response.cookie('refresh_token', credentials.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: 'lax',
       });
       return { message: 'Successfully refreshed', user: credentials.user };
     } catch (error) {

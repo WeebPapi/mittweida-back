@@ -2,10 +2,28 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-
+  const keyPath = join(__dirname, '..', 'ssl', 'key.pem');
+  const certPath = join(__dirname, '..', 'ssl', 'cert.pem');
+  let httpsOptions = {};
+  try {
+    const privateKey = readFileSync(keyPath, 'utf8');
+    const certificate = readFileSync(certPath, 'utf8');
+    httpsOptions = { key: privateKey, cert: certificate };
+    console.log('SSL certificates loaded successfully.');
+  } catch (error) {
+    console.error('Error loading SSL certificates:', error.message);
+    console.warn(
+      'Application will run without HTTPS due to certificate loading issues.',
+    );
+  }
+  const app = await NestFactory.create(AppModule, {
+    httpsOptions,
+  });
+  app.use(cookieParser());
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
@@ -22,7 +40,6 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  app.use(cookieParser());
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -34,6 +51,6 @@ async function bootstrap() {
     }),
   );
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();
