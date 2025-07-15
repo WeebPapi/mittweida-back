@@ -1,14 +1,23 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
-  IsOptional,
   IsNumber,
   IsUrl,
+  IsOptional,
+  IsDateString,
   IsArray,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateActivityDto {
+export class ActivityDto {
+  @ApiProperty({
+    description: 'The unique identifier of the activity',
+    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+  })
+  @IsString()
+  @IsNotEmpty()
+  id: string;
+
   @ApiProperty({
     description: 'The name of the activity',
     example: 'Adventure Park Fun',
@@ -97,14 +106,22 @@ export class CreateActivityDto {
     required: false,
     nullable: true,
   })
-  @ApiProperty({
-    description: 'List of image URLs for the activity gallery',
-    type: [String],
-    example: ['https://example.com/img1.jpg', 'https://example.com/img2.jpg'],
-    required: false,
-  })
   @IsOptional()
   @IsArray()
   @IsString({ each: true })
   gallery_images?: string[];
+
+  @ApiProperty({
+    description: 'The timestamp when the activity was created',
+    example: '2025-07-15T14:30:00.000Z',
+  })
+  @IsDateString()
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'The timestamp when the activity was last updated',
+    example: '2025-07-15T14:35:00.000Z',
+  })
+  @IsDateString()
+  updatedAt: Date;
 }

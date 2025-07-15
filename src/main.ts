@@ -4,11 +4,13 @@ import * as cookieParser from 'cookie-parser';
 import { ValidationPipe } from '@nestjs/common';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
   const keyPath = join(__dirname, '..', 'ssl', 'key.pem');
   const certPath = join(__dirname, '..', 'ssl', 'cert.pem');
   let httpsOptions = {};
+
   try {
     const privateKey = readFileSync(keyPath, 'utf8');
     const certificate = readFileSync(certPath, 'utf8');
@@ -38,6 +40,38 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+  });
+
+  const config = new DocumentBuilder()
+    .setTitle('Mittweida Api')
+    .setVersion('1.0')
+    .addCookieAuth(
+      'accessToken',
+      {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'access_token',
+      },
+      'acessTokenCookie',
+    )
+    .addCookieAuth(
+      'refreshToken',
+      {
+        type: 'apiKey',
+        in: 'cookie',
+        name: 'refresh_token',
+      },
+      'refreshTokenCookie',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+
+  SwaggerModule.setup('api-docs', app, document, {
+    swaggerOptions: {
+      withCredentials: true,
+      persistAuthorization: true,
+    },
   });
 
   app.useGlobalPipes(

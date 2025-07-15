@@ -70,7 +70,7 @@ export class PhotosService {
 
       await parallelUploads3.done();
 
-      const photoUrl = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${s3Key}`; // <--- Store direct public URL
+      const photoUrl = `https://${this.bucketName}.s3.${this.region}.amazonaws.com/${s3Key}`;
 
       const newPhoto = await this.prisma.photo.create({
         data: {
@@ -132,7 +132,8 @@ export class PhotosService {
       );
     }
 
-    const s3Key = photo.url.replace(`s3://${this.bucketName}/`, '');
+    const url = new URL(photo.url);
+    const s3Key = url.pathname.substring(1);
     await this.s3.send(
       new DeleteObjectCommand({
         Bucket: this.bucketName,

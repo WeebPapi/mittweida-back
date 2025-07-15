@@ -39,6 +39,36 @@ export class PollsService {
       throw new InternalServerErrorException('Poll not found');
     }
   }
+
+  async findMostRecentPollByGroupId(groupId: string): Promise<Poll | null> {
+    try {
+      const mostRecentPoll = await this.prismaService.poll.findFirst({
+        where: {
+          groupId: groupId,
+        },
+        include: {
+          options: {
+            include: {
+              activity: true,
+              votes: true,
+            },
+          },
+          user: { select: { id: true, firstName: true, lastName: true } },
+          group: { select: { id: true, name: true } },
+        },
+        orderBy: {
+          expiresAt: 'desc',
+        },
+      });
+
+      return mostRecentPoll;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to retrieve most recent poll for group.',
+      );
+    }
+  }
+
   async create(createPollDto: CreatePollDto, userId: string) {
     const { question, groupId, expiresAt, selectedActivityIds } = createPollDto;
     const groupMember = await this.prismaService.groupMember.findUnique({
@@ -54,35 +84,44 @@ export class PollsService {
       throw new ForbiddenException('You are not a member of this group.');
     }
 
-    const activities =
-      await this.activitiesService.findManyByIds(selectedActivityIds);
-    const newPoll = await this.prismaService.$transaction(async (prisma) => {
-      const poll = await prisma.poll.create({
-        data: {
-          question,
-          groupId,
-          expiresAt,
-          createdBy: userId,
-        },
+    try {
+      // Added try-catch block here
+      const activities =
+        await this.activitiesService.findManyByIds(selectedActivityIds);
+      const newPoll = await this.prismaService.$transaction(async (prisma) => {
+        const poll = await prisma.poll.create({
+          data: {
+            question,
+            groupId,
+            expiresAt,
+            createdBy: userId,
+          },
+        });
+
+        const pollOptionsData = activities.map((activity) => ({
+          text: activity.name,
+          activityId: activity.id,
+          pollId: poll.id,
+        }));
+
+        await prisma.pollOption.createMany({
+          data: pollOptionsData,
+        });
+
+        return prisma.poll.findUnique({
+          where: { id: poll.id },
+          include: { options: { include: { activity: true } } },
+        });
       });
 
-      const pollOptionsData = activities.map((activity) => ({
-        text: activity.name,
-        activityId: activity.id,
-        pollId: poll.id,
-      }));
-
-      await prisma.pollOption.createMany({
-        data: pollOptionsData,
-      });
-
-      return prisma.poll.findUnique({
-        where: { id: poll.id },
-        include: { options: { include: { activity: true } } },
-      });
-    });
-
-    return newPoll;
+      return newPoll;
+    } catch (error) {
+      // It's good practice to log the original error for debugging purposes
+      // console.error('Error creating poll in transaction:', error);
+      throw new InternalServerErrorException(
+        'Failed to create poll due to a server error.',
+      );
+    }
   }
 
   async voteOnPoll(pollId: string, pollOptionId: string, userId: string) {
@@ -149,6 +188,7 @@ export class PollsService {
       throw new InternalServerErrorException('Error updating poll');
     }
   }
+
   async delete(id: string) {
     return this.prismaService.poll.delete({ where: { id } });
   }

@@ -100,10 +100,11 @@ export class GroupsService {
     const group = await this.prismaService.group.findUnique({ where: { id } });
     if (!group) throw new NotFoundException('Group Not found');
     try {
-      return this.prismaService.group.update({
+      const updatedGroup = await this.prismaService.group.update({
         where: { id },
         data: updateGroupDto,
       });
+      return updatedGroup;
     } catch (error) {
       throw new InternalServerErrorException('Failed to update group');
     }

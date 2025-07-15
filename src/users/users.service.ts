@@ -12,6 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class UsersService {
   constructor(private readonly prismaService: PrismaService) {}
+
   async create(createUserDto: CreateUserDto) {
     try {
       return await this.prismaService.user.create({ data: createUserDto });
@@ -24,32 +25,40 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to create user');
     }
   }
+
   async findById(id: string): Promise<User> {
     try {
-      const user = (await this.prismaService.user.findUnique({
+      const user = await this.prismaService.user.findUnique({
         where: {
           id,
         },
         include: { groups: {}, photos: {}, polls: {}, pollVotes: {} },
-      })) as User;
+      });
+
+      if (!user) {
+        throw new NotFoundException('User with ID not found');
+      }
       return user;
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+
       throw new NotFoundException('User with ID not found');
     }
   }
+
   async findByEmail(email: string) {
     const user = await this.prismaService.user.findUnique({
       where: { email },
     });
-
     return user;
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
     try {
-      if (!(await this.findById(id))) {
-        throw new NotFoundException('User with ID not found');
-      }
+      await this.findById(id);
+
       const updateAction = await this.prismaService.user.update({
         where: { id },
         data: updateUserDto,
@@ -59,6 +68,9 @@ export class UsersService {
         id: updateAction.id,
       };
     } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new ConflictException('Email already in use');
@@ -67,10 +79,9 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to update user');
     }
   }
+
   async delete(id: string) {
-    if (!(await this.findById(id))) {
-      throw new NotFoundException('User with ID not found');
-    }
+    await this.findById(id);
     return this.prismaService.user.delete({ where: { id } });
   }
 }
