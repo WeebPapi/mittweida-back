@@ -10,7 +10,7 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableCors({
     origin: [
-      'https://weebpapi.github.io/mittweida-front',
+      'https://weebpapi.github.io/',
       'https://localhost:5173',
       'https://172.17.212.53:5173',
       'https://192.168.0.101:5173',
