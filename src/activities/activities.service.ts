@@ -77,7 +77,7 @@ export class ActivitiesService {
     categories,
     latitude,
     longitude,
-    limit = 4,
+    limit,
     offset = 0,
   }: ActivitySearch): Promise<ActivityDto[]> {
     const where: Prisma.ActivityWhereInput = {

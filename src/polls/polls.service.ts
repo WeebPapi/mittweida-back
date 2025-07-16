@@ -55,6 +55,7 @@ export class PollsService {
           },
           user: { select: { id: true, firstName: true, lastName: true } },
           group: { select: { id: true, name: true } },
+          votes: {},
         },
         orderBy: {
           expiresAt: 'desc',

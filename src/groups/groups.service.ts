@@ -90,7 +90,11 @@ export class GroupsService {
     return this.prismaService.group.findUnique({
       where: { id },
       include: {
-        members: {},
+        members: {
+          include: {
+            user: true,
+          },
+        },
         photos: {},
         polls: {},
       },
