@@ -4,6 +4,11 @@
 
 Nest.JS project made with typescript to be consumed by a react vite frontend
 
+# NOTE for dev branch
+
+For the development branch, its meant to be run on https://localhost:3000 meaning if you want to run it locally, you must create your own ssl directory on the same level as src
+and populate it with cert.pem csr.pem and key.pem and the frontend you access it from must also be https secured (you can do this with https://localhost:5173)
+
 Frontend link: https://weebpapi.github.io/mittweida-front/
 Backend link: https://mittweida-back.onrender.com
 (the deployed backend link spins down after 15 minutes of inactivity)
