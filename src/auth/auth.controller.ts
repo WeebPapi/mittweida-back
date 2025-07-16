@@ -55,13 +55,15 @@ export class AuthController {
     response.cookie('access_token', credentials.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
 
     return {
@@ -89,13 +91,15 @@ export class AuthController {
     response.cookie('access_token', credentials.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
 
     response.cookie('refresh_token', credentials.refresh_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
     console.log('Response body', response.getHeaders());
 
@@ -112,13 +116,15 @@ export class AuthController {
     response.clearCookie('access_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
 
     response.clearCookie('refresh_token', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'none',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      partitioned: process.env.NODE_ENV === 'production',
     });
 
     return { message: 'Logged out successfully' };
@@ -145,13 +151,15 @@ export class AuthController {
       response.cookie('access_token', credentials.access_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        partitioned: process.env.NODE_ENV === 'production',
       });
 
       response.cookie('refresh_token', credentials.refresh_token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'none',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+        partitioned: process.env.NODE_ENV === 'production',
       });
       return { message: 'Successfully refreshed', user: credentials.user };
     } catch (error) {
